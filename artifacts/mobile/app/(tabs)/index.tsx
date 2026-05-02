@@ -22,6 +22,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { MeshVisualization, ObjectType, SimStatus } from "@/components/MeshVisualization";
+import { useBackend } from "@/context/BackendContext";
 import { useColors } from "@/hooks/useColors";
 
 type Preset = "Cylinder Wake" | "NACA 0012" | "Ahmed Body";
@@ -203,6 +204,7 @@ const cfgStyles = StyleSheet.create({
 export default function SimulatorScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { connectionState, backendStatus, latencyMs } = useBackend();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   // Tab bar heights: web 84px (explicitly set), iOS 49pt standard, Android 56dp standard.
   // We need enough paddingBottom so the action bar buttons sit fully above the floating tab bar.
@@ -372,14 +374,43 @@ export default function SimulatorScreen() {
             </Text>
           </View>
         </View>
-        <View style={[
-          styles.sessionBadge,
-          { borderColor: simStatus === "running" ? "#00E5FF40" : "#00C97A40", backgroundColor: simStatus === "running" ? "#00E5FF10" : "#00C97A10" },
-        ]}>
-          <Animated.View style={[styles.sessionDot, { backgroundColor: simStatus === "running" ? colors.primary : "#00C97A", opacity: simStatus === "running" ? pulseOpacity : 1 }]} />
-          <Text style={[styles.sessionText, { color: simStatus === "running" ? colors.primary : "#00C97A", fontFamily: "Inter_500Medium" }]}>
-            {simStatus === "running" ? "SOLVING" : "SESSION ACTIVE"}
-          </Text>
+        <View style={styles.headerRight}>
+          <View style={[
+            styles.sessionBadge,
+            { borderColor: simStatus === "running" ? "#00E5FF40" : "#00C97A40", backgroundColor: simStatus === "running" ? "#00E5FF10" : "#00C97A10" },
+          ]}>
+            <Animated.View style={[styles.sessionDot, { backgroundColor: simStatus === "running" ? colors.primary : "#00C97A", opacity: simStatus === "running" ? pulseOpacity : 1 }]} />
+            <Text style={[styles.sessionText, { color: simStatus === "running" ? colors.primary : "#00C97A", fontFamily: "Inter_500Medium" }]}>
+              {simStatus === "running" ? "SOLVING" : "ACTIVE"}
+            </Text>
+          </View>
+          <View style={[
+            styles.backendChip,
+            {
+              borderColor: connectionState === "connected" ? "#00C97A40" : connectionState === "checking" ? "#00E5FF30" : "#FF4D4D40",
+              backgroundColor: connectionState === "connected" ? "#00C97A08" : connectionState === "checking" ? "#00E5FF08" : "#FF4D4D08",
+            },
+          ]}>
+            <View style={[styles.backendDot, {
+              backgroundColor: connectionState === "connected" ? "#00C97A" : connectionState === "checking" ? colors.primary : "#FF4D4D",
+            }]} />
+            <Text style={[styles.backendLabel, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>BACKEND</Text>
+            <Text style={[styles.backendType, {
+              color: connectionState === "connected" ? colors.foreground : connectionState === "checking" ? colors.mutedForeground : "#FF4D4D",
+              fontFamily: "Inter_500Medium",
+            }]}>
+              {connectionState === "connected"
+                ? (backendStatus?.type ?? "Local CPU")
+                : connectionState === "checking"
+                ? "..."
+                : "OFFLINE"}
+            </Text>
+            {connectionState === "connected" && latencyMs !== null && (
+              <Text style={[styles.backendLatency, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
+                {latencyMs}ms
+              </Text>
+            )}
+          </View>
         </View>
       </View>
 
@@ -690,9 +721,15 @@ const styles = StyleSheet.create({
   logoBox: { width: 24, height: 24, borderRadius: 4, borderWidth: 1, alignItems: "center", justifyContent: "center" },
   logoLetter: { fontSize: 11 },
   headerTitle: { fontSize: 12, letterSpacing: 0.8 },
+  headerRight: { flexDirection: "row", alignItems: "center", gap: 6 },
   sessionBadge: { flexDirection: "row", alignItems: "center", gap: 5, borderWidth: 1, borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
   sessionDot: { width: 5, height: 5, borderRadius: 2.5 },
   sessionText: { fontSize: 9, letterSpacing: 0.6 },
+  backendChip: { flexDirection: "row", alignItems: "center", gap: 4, borderWidth: 1, borderRadius: 4, paddingHorizontal: 7, paddingVertical: 3 },
+  backendDot: { width: 5, height: 5, borderRadius: 2.5 },
+  backendLabel: { fontSize: 8, letterSpacing: 0.6 },
+  backendType: { fontSize: 9 },
+  backendLatency: { fontSize: 8 },
   presetBar: { flexDirection: "row", alignItems: "center", paddingHorizontal: 14, paddingVertical: 8, gap: 10, borderBottomWidth: 1 },
   presetLabel: { fontSize: 10, letterSpacing: 0.8 },
   presetBtn: { flex: 1, flexDirection: "row", justifyContent: "space-between", alignItems: "center", borderWidth: 1, borderRadius: 4, paddingHorizontal: 10, paddingVertical: 6 },

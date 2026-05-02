@@ -9,12 +9,13 @@ import React, {
 } from "react";
 
 import {
-  AI_RESPONSES,
   ChatMessage,
   INITIAL_MESSAGES,
   SIMULATIONS,
   Simulation,
 } from "@/constants/mockData";
+import { api } from "@/services/api";
+import { useBackend } from "@/context/BackendContext";
 
 interface SimulationContextValue {
   simulations: Simulation[];
@@ -22,15 +23,31 @@ interface SimulationContextValue {
   isAiTyping: boolean;
   sendMessage: (text: string) => void;
   getSimulation: (id: string) => Simulation | undefined;
+  refreshSimulations: () => Promise<void>;
 }
 
 const SimulationContext = createContext<SimulationContextValue | null>(null);
 
 export function SimulationProvider({ children }: { children: React.ReactNode }) {
-  const [simulations] = useState<Simulation[]>(SIMULATIONS);
+  const { connectionState } = useBackend();
+  const [simulations, setSimulations] = useState<Simulation[]>(SIMULATIONS);
   const [messages, setMessages] = useState<ChatMessage[]>(INITIAL_MESSAGES);
   const [isAiTyping, setIsAiTyping] = useState(false);
   const msgIdRef = useRef(100);
+
+  const refreshSimulations = useCallback(async () => {
+    if (connectionState !== "connected") return;
+    try {
+      const { simulations: apiSims } = await api.listSimulations();
+      setSimulations(apiSims as unknown as Simulation[]);
+    } catch {
+      // fall back silently — local state remains
+    }
+  }, [connectionState]);
+
+  useEffect(() => {
+    refreshSimulations();
+  }, [refreshSimulations]);
 
   useEffect(() => {
     AsyncStorage.getItem("chat_messages").then((stored) => {
@@ -54,42 +71,50 @@ export function SimulationProvider({ children }: { children: React.ReactNode }) 
     [simulations]
   );
 
-  const pickAiResponse = (text: string): string => {
-    const lower = text.toLowerCase();
-    if (lower.includes("converg")) return AI_RESPONSES["converge"] ?? AI_RESPONSES["default"] ?? "";
-    if (lower.includes("residual")) return AI_RESPONSES["residual"] ?? AI_RESPONSES["default"] ?? "";
-    if (lower.includes("mesh")) return AI_RESPONSES["mesh"] ?? AI_RESPONSES["default"] ?? "";
-    if (lower.includes("ahmed") || lower.includes("drag")) return AI_RESPONSES["ahmed"] ?? AI_RESPONSES["default"] ?? "";
-    if (lower.includes("help") || lower.includes("what can")) return AI_RESPONSES["help"] ?? AI_RESPONSES["default"] ?? "";
-    return AI_RESPONSES["default"] ?? "";
-  };
-
-  const sendMessage = useCallback((text: string) => {
-    const userMsg: ChatMessage = {
-      id: `msg_${++msgIdRef.current}`,
-      role: "user",
-      text,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, userMsg]);
-    setIsAiTyping(true);
-
-    const delay = 1200 + Math.random() * 800;
-    setTimeout(() => {
-      const aiMsg: ChatMessage = {
+  const sendMessage = useCallback(
+    (text: string) => {
+      const userMsg: ChatMessage = {
         id: `msg_${++msgIdRef.current}`,
-        role: "assistant",
-        text: pickAiResponse(text),
+        role: "user",
+        text,
         timestamp: new Date().toISOString(),
       };
-      setMessages((prev) => [...prev, aiMsg]);
-      setIsAiTyping(false);
-    }, delay);
-  }, []);
+      setMessages((prev) => [...prev, userMsg]);
+      setIsAiTyping(true);
+
+      const addReply = (replyText: string) => {
+        const aiMsg: ChatMessage = {
+          id: `msg_${++msgIdRef.current}`,
+          role: "assistant",
+          text: replyText,
+          timestamp: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+        setIsAiTyping(false);
+      };
+
+      if (connectionState === "connected") {
+        api.aiChat(text)
+          .then(({ reply }) => addReply(reply))
+          .catch(() => addReply("I couldn't reach the AI backend. Please try again."));
+      } else {
+        const delay = 1200 + Math.random() * 800;
+        setTimeout(() => {
+          const lower = text.toLowerCase();
+          let reply = "I'm monitoring your simulation workspace. What would you like to know?";
+          if (lower.includes("converg")) reply = "Based on residual decay, I estimate convergence in ~380 more iterations.";
+          else if (lower.includes("residual")) reply = "The residual is 2.3e-3 and decreasing. Target is 1e-5 — 2-3 orders of magnitude remaining.";
+          else if (lower.includes("mesh")) reply = "Mesh topology is valid. Boundary layer y+ is within acceptable range for RANS k-ω SST.";
+          addReply(reply);
+        }, delay);
+      }
+    },
+    [connectionState]
+  );
 
   return (
     <SimulationContext.Provider
-      value={{ simulations, messages, isAiTyping, sendMessage, getSimulation }}
+      value={{ simulations, messages, isAiTyping, sendMessage, getSimulation, refreshSimulations }}
     >
       {children}
     </SimulationContext.Provider>

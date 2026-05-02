@@ -14,6 +14,7 @@ import { KeyboardAvoidingView } from "react-native-keyboard-controller";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ChatMessage } from "@/constants/mockData";
+import { useBackend } from "@/context/BackendContext";
 import { useSimulations } from "@/context/SimulationContext";
 import { useColors } from "@/hooks/useColors";
 
@@ -77,6 +78,7 @@ function TypingIndicator() {
 export default function CopilotScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
+  const { connectionState } = useBackend();
   const { messages, isAiTyping, sendMessage } = useSimulations();
   const [input, setInput] = useState("");
   const listRef = useRef<FlatList>(null);
@@ -112,13 +114,22 @@ export default function CopilotScreen() {
       keyboardVerticalOffset={0}
     >
       <View style={[styles.header, { paddingTop: topPad + 12, borderBottomColor: colors.border }]}>
-        <View style={[styles.onlineIndicator, { backgroundColor: "#00C97A" }]} />
-        <View>
+        <View style={[styles.onlineIndicator, {
+          backgroundColor: connectionState === "connected" ? "#00C97A" : connectionState === "checking" ? colors.primary : "#FF4D4D",
+        }]} />
+        <View style={{ flex: 1 }}>
           <Text style={[styles.headerTitle, { color: colors.foreground, fontFamily: "Inter_700Bold" }]}>
             QENGINE AI
           </Text>
-          <Text style={[styles.headerSub, { color: "#00C97A", fontFamily: "Inter_400Regular" }]}>
-            Online · Workspace connected
+          <Text style={[styles.headerSub, {
+            color: connectionState === "connected" ? "#00C97A" : connectionState === "checking" ? colors.mutedForeground : "#FF4D4D",
+            fontFamily: "Inter_400Regular",
+          }]}>
+            {connectionState === "connected"
+              ? "Online · Backend connected"
+              : connectionState === "checking"
+              ? "Connecting to backend..."
+              : "Offline · Using local AI"}
           </Text>
         </View>
       </View>

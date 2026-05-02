@@ -17,6 +17,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
+import { BackendProvider } from "@/context/BackendContext";
 import { SimulationProvider } from "@/context/SimulationContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -68,22 +69,24 @@ export default function RootLayout() {
       <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <SimulationProvider>
-              <GestureHandlerRootView>
-                <KeyboardProvider>
-                  <StatusBar style="light" backgroundColor="#030810" />
-                  <AuthRedirect />
-                  <Stack screenOptions={{ headerShown: false }}>
-                    <Stack.Screen name="login" options={{ headerShown: false }} />
-                    <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-                    <Stack.Screen
-                      name="simulation/[id]"
-                      options={{ headerShown: false, presentation: "card" }}
-                    />
-                  </Stack>
-                </KeyboardProvider>
-              </GestureHandlerRootView>
-            </SimulationProvider>
+            <BackendProvider>
+              <SimulationProvider>
+                <GestureHandlerRootView>
+                  <KeyboardProvider>
+                    <StatusBar style="light" backgroundColor="#030810" />
+                    <AuthRedirect />
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="login" options={{ headerShown: false }} />
+                      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                      <Stack.Screen
+                        name="simulation/[id]"
+                        options={{ headerShown: false, presentation: "card" }}
+                      />
+                    </Stack>
+                  </KeyboardProvider>
+                </GestureHandlerRootView>
+              </SimulationProvider>
+            </BackendProvider>
           </AuthProvider>
         </QueryClientProvider>
       </ErrorBoundary>
