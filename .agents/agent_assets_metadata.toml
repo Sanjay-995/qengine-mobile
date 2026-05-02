@@ -1,0 +1,14 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "Cfd_isMjLOagDVs2rXOGe"
+uri = "file://artifacts/mobile/assets/images/icon.png"
+type = "image"
+title = "generated_image"
+
+[[generated]]
+id = "-n_YpyPTy_ZQgU217M6hz"
+uri = "file://artifacts/mobile/assets/images/sim_hero.png"
+type = "image"
+title = "generated_image"
