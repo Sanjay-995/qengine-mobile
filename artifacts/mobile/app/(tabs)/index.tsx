@@ -204,7 +204,7 @@ const cfgStyles = StyleSheet.create({
 export default function SimulatorScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { connectionState, backendStatus, latencyMs } = useBackend();
+  const { connectionState, latencyMs } = useBackend();
   const topPad = Platform.OS === "web" ? 67 : insets.top;
   // Tab bar heights: web 84px (explicitly set), iOS 49pt standard, Android 56dp standard.
   // We need enough paddingBottom so the action bar buttons sit fully above the floating tab bar.
@@ -400,7 +400,7 @@ export default function SimulatorScreen() {
               fontFamily: "Inter_500Medium",
             }]}>
               {connectionState === "connected"
-                ? (backendStatus?.type ?? "Local CPU")
+                ? "AWS EC2"
                 : connectionState === "checking"
                 ? "..."
                 : "OFFLINE"}

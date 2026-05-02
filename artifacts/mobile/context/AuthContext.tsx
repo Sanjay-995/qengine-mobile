@@ -7,59 +7,90 @@ import React, {
   useState,
 } from "react";
 
+import { api, type BackendUser } from "@/services/api";
+
 interface AuthContextValue {
   isLoggedIn: boolean;
   isLoading: boolean;
-  username: string;
+  user: BackendUser | null;
+  token: string | null;
   signIn: (username: string, password: string) => Promise<{ error?: string }>;
   signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const STORAGE_KEY = "qengine_auth";
+const TOKEN_KEY = "qengine_jwt";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [username, setUsername] = useState("");
+  const [token, setToken] = useState<string | null>(null);
+  const [user, setUser] = useState<BackendUser | null>(null);
 
+  // On mount: restore stored JWT and validate it via /auth/me
   useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY).then((val) => {
-      if (val) {
-        try {
-          const parsed = JSON.parse(val) as { username: string };
-          setUsername(parsed.username);
-          setIsLoggedIn(true);
-        } catch {
-          // ignore
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem(TOKEN_KEY);
+        if (stored) {
+          const me = await api.me(stored);
+          setToken(stored);
+          setUser(me);
         }
+      } catch {
+        // Token invalid or expired — clear it
+        await AsyncStorage.removeItem(TOKEN_KEY);
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    });
+    })();
   }, []);
 
   const signIn = useCallback(
-    async (user: string, password: string): Promise<{ error?: string }> => {
-      if (!user.trim()) return { error: "Username is required." };
+    async (username: string, password: string): Promise<{ error?: string }> => {
+      if (!username.trim()) return { error: "Username is required." };
       if (!password.trim()) return { error: "Password is required." };
-      // Demo: accept any credentials
-      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify({ username: user.trim() }));
-      setUsername(user.trim());
-      setIsLoggedIn(true);
-      return {};
+      try {
+        const { access_token } = await api.login(username.trim(), password);
+        const me = await api.me(access_token);
+        await AsyncStorage.setItem(TOKEN_KEY, access_token);
+        setToken(access_token);
+        setUser(me);
+        return {};
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        if (msg.includes("401") || msg.includes("Incorrect")) {
+          return { error: "Incorrect email, username or password." };
+        }
+        if (msg.includes("400") || msg.includes("Inactive")) {
+          return { error: "This account is inactive." };
+        }
+        if (msg.includes("fetch") || msg.includes("abort") || msg.includes("network")) {
+          return { error: "Could not reach the server. Check your connection." };
+        }
+        return { error: "Sign in failed. Please try again." };
+      }
     },
     []
   );
 
-  const signOut = useCallback(() => {
-    AsyncStorage.removeItem(STORAGE_KEY);
-    setIsLoggedIn(false);
-    setUsername("");
+  const signOut = useCallback(async () => {
+    await AsyncStorage.removeItem(TOKEN_KEY);
+    setToken(null);
+    setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, isLoading, username, signIn, signOut }}>
+    <AuthContext.Provider
+      value={{
+        isLoggedIn: !!user,
+        isLoading,
+        user,
+        token,
+        signIn,
+        signOut,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

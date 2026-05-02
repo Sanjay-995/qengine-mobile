@@ -73,7 +73,9 @@ function SectionHeader({ title }: { title: string }) {
 export default function SettingsScreen() {
   const colors = useColors();
   const insets = useSafeAreaInsets();
-  const { username, signOut } = useAuth();
+  const { user, signOut } = useAuth();
+  const displayName = user?.full_name ?? user?.email ?? "Engineer";
+  const initials = displayName.slice(0, 2).toUpperCase();
   const [notifRun, setNotifRun] = React.useState(true);
   const [notifConverge, setNotifConverge] = React.useState(true);
   const [notifFail, setNotifFail] = React.useState(true);
@@ -100,15 +102,15 @@ export default function SettingsScreen() {
       <View style={[styles.profileCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
         <View style={[styles.avatar, { backgroundColor: colors.primary + "20", borderColor: colors.primary + "40" }]}>
           <Text style={[styles.avatarText, { color: colors.primary, fontFamily: "Inter_700Bold" }]}>
-            {(username || "AE").slice(0, 2).toUpperCase()}
+            {initials}
           </Text>
         </View>
         <View>
           <Text style={[styles.profileName, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
-            {username || "Engineer"}
+            {displayName}
           </Text>
           <Text style={[styles.profileEmail, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
-            {username ? `${username}@qengine.ai` : "workspace@qengine.ai"}
+            {user?.email ?? "workspace@qengine.ai"}
           </Text>
         </View>
         <View style={[styles.planBadge, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "40" }]}>

@@ -1,11 +1,10 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { api, type BackendStatus } from "@/services/api";
+import { api } from "@/services/api";
 
 export type BackendConnectionState = "checking" | "connected" | "offline";
 
 interface BackendContextValue {
   connectionState: BackendConnectionState;
-  backendStatus: BackendStatus | null;
   latencyMs: number | null;
   lastCheckedAt: Date | null;
   refresh: () => void;
@@ -13,7 +12,6 @@ interface BackendContextValue {
 
 const BackendContext = createContext<BackendContextValue>({
   connectionState: "checking",
-  backendStatus: null,
   latencyMs: null,
   lastCheckedAt: null,
   refresh: () => {},
@@ -21,7 +19,6 @@ const BackendContext = createContext<BackendContextValue>({
 
 export function BackendProvider({ children }: { children: React.ReactNode }) {
   const [connectionState, setConnectionState] = useState<BackendConnectionState>("checking");
-  const [backendStatus, setBackendStatus] = useState<BackendStatus | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [lastCheckedAt, setLastCheckedAt] = useState<Date | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -29,16 +26,12 @@ export function BackendProvider({ children }: { children: React.ReactNode }) {
   const check = useCallback(async () => {
     try {
       const t0 = Date.now();
-      await api.health();
-      const ping = Date.now() - t0;
-      setLatencyMs(ping);
-
-      const status = await api.backendStatus();
-      setBackendStatus(status);
+      await api.devHealth();
+      setLatencyMs(Date.now() - t0);
       setConnectionState("connected");
     } catch {
       setConnectionState("offline");
-      setBackendStatus(null);
+      setLatencyMs(null);
     } finally {
       setLastCheckedAt(new Date());
     }
@@ -46,14 +39,14 @@ export function BackendProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     check();
-    timerRef.current = setInterval(check, 10_000);
+    timerRef.current = setInterval(check, 15_000);
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [check]);
 
   return (
-    <BackendContext.Provider value={{ connectionState, backendStatus, latencyMs, lastCheckedAt, refresh: check }}>
+    <BackendContext.Provider value={{ connectionState, latencyMs, lastCheckedAt, refresh: check }}>
       {children}
     </BackendContext.Provider>
   );
