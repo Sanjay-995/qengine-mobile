@@ -27,13 +27,13 @@ function MetricCard({ label, value, unit }: { label: string; value: string; unit
   const colors = useColors();
   return (
     <View style={[styles.metricCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
-      <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>{label}</Text>
+      <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>{label}</Text>
       <View style={styles.metricValueRow}>
         <Text style={[styles.metricValue, { color: colors.foreground, fontFamily: "Inter_600SemiBold" }]}>
           {value}
         </Text>
         {unit && (
-          <Text style={[styles.metricUnit, { color: colors.mutedForeground }]}>{unit}</Text>
+          <Text style={[styles.metricUnit, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>{unit}</Text>
         )}
       </View>
     </View>
@@ -146,7 +146,7 @@ export default function SimulationDetailScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHead}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>PERFORMANCE METRICS</Text>
+          <Text style={[styles.sectionTitle, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>PERFORMANCE METRICS</Text>
         </View>
         <View style={styles.metricGrid}>
           {sim.residual !== null && (
@@ -176,7 +176,7 @@ export default function SimulationDetailScreen() {
       {sim.residualHistory.length > 0 && (
         <View style={styles.section}>
           <View style={styles.sectionHead}>
-            <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>RESIDUAL HISTORY</Text>
+            <Text style={[styles.sectionTitle, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>RESIDUAL HISTORY</Text>
           </View>
           <View style={[styles.chartCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <ResidualChart data={sim.residualHistory} color={accentColor} height={90} />
@@ -189,7 +189,7 @@ export default function SimulationDetailScreen() {
 
       <View style={styles.section}>
         <View style={styles.sectionHead}>
-          <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>CONFIGURATION</Text>
+          <Text style={[styles.sectionTitle, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>CONFIGURATION</Text>
         </View>
         <View style={[styles.configCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
           <ConfigRow label="Solver" value={sim.solver} />
@@ -204,7 +204,7 @@ export default function SimulationDetailScreen() {
       {sim.validation && (
         <View style={styles.section}>
           <View style={styles.sectionHead}>
-            <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>VALIDATION</Text>
+            <Text style={[styles.sectionTitle, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>VALIDATION</Text>
           </View>
           <View style={[styles.validCard, { backgroundColor: colors.card, borderColor: colors.border }]}>
             <ValidationItem label="Mesh topology" ok={sim.validation.meshTopology} />
@@ -219,7 +219,7 @@ export default function SimulationDetailScreen() {
       {sim.aiAnalysis && (
         <View style={styles.section}>
           <View style={styles.sectionHead}>
-            <Text style={[styles.sectionTitle, { color: colors.mutedForeground }]}>QENGINE AI ANALYSIS</Text>
+            <Text style={[styles.sectionTitle, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>QENGINE AI ANALYSIS</Text>
           </View>
           <View style={[styles.aiCard, { backgroundColor: colors.card, borderColor: colors.primary + "30" }]}>
             <View style={styles.aiCardHeader}>

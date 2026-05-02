@@ -289,10 +289,9 @@ export default function SimulatorScreen() {
       if (iter >= maxIter || res < 1e-5) {
         clearInterval(runIntervalRef.current!);
         stopPulse();
-        const finalRes = res < 1e-5 ? res : res;
         setLogLines((prev) => [
           ...prev,
-          `Convergence achieved at iter ${Math.min(iter, maxIter)}: final res=${finalRes.toExponential(2)}`,
+          `Convergence achieved at iter ${Math.min(iter, maxIter)}: final res=${res.toExponential(2)}`,
           `Simulation complete. Results saved.`,
         ]);
         setSimStatus("converged");
@@ -460,7 +459,7 @@ export default function SimulatorScreen() {
               accent
             />
             <ConfigRow
-              label="Inlet Velocity..."
+              label="Inlet Velocity"
               value={config.inletVelocity}
               onChangeText={(t) => setConfig((c) => ({ ...c, inletVelocity: t }))}
               keyboardType="numeric"

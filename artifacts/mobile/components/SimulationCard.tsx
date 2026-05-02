@@ -16,10 +16,10 @@ interface Props {
   simulation: Simulation;
 }
 
-function ProgressBar({ value, max, color }: { value: number; max: number; color: string }) {
+function ProgressBar({ value, max, color, trackColor }: { value: number; max: number; color: string; trackColor: string }) {
   const pct = Math.min(value / max, 1);
   return (
-    <View style={styles.progressTrack}>
+    <View style={[styles.progressTrack, { backgroundColor: trackColor }]}>
       <View style={[styles.progressFill, { width: `${pct * 100}%` as any, backgroundColor: color }]} />
     </View>
   );
@@ -57,7 +57,7 @@ export function SimulationCard({ simulation }: Props) {
       </View>
 
       <View style={styles.progress}>
-        <ProgressBar value={simulation.iterations} max={simulation.maxIterations} color={progressColor} />
+        <ProgressBar value={simulation.iterations} max={simulation.maxIterations} color={progressColor} trackColor={colors.border} />
         <Text style={[styles.progressLabel, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
           {simulation.iterations.toLocaleString()} / {simulation.maxIterations.toLocaleString()} iter
         </Text>
@@ -66,7 +66,7 @@ export function SimulationCard({ simulation }: Props) {
       <View style={styles.metrics}>
         {simulation.residual !== null && (
           <View style={styles.metric}>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>RESIDUAL</Text>
+            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>RESIDUAL</Text>
             <Text style={[styles.metricValue, { color: colors.foreground, fontFamily: "Inter_500Medium" }]}>
               {simulation.residual.toExponential(2)}
             </Text>
@@ -74,7 +74,7 @@ export function SimulationCard({ simulation }: Props) {
         )}
         {simulation.dragCoefficient !== null && (
           <View style={styles.metric}>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>Cd</Text>
+            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>Cd</Text>
             <Text style={[styles.metricValue, { color: colors.foreground, fontFamily: "Inter_500Medium" }]}>
               {simulation.dragCoefficient.toFixed(4)}
             </Text>
@@ -82,7 +82,7 @@ export function SimulationCard({ simulation }: Props) {
         )}
         {simulation.reynoldsNumber !== null && (
           <View style={styles.metric}>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>Re</Text>
+            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>Re</Text>
             <Text style={[styles.metricValue, { color: colors.foreground, fontFamily: "Inter_500Medium" }]}>
               {simulation.reynoldsNumber >= 1e6
                 ? `${(simulation.reynoldsNumber / 1e6).toFixed(1)}M`
@@ -92,7 +92,7 @@ export function SimulationCard({ simulation }: Props) {
         )}
         {simulation.computeTimeMin !== null && (
           <View style={styles.metric}>
-            <Text style={[styles.metricLabel, { color: colors.mutedForeground }]}>TIME</Text>
+            <Text style={[styles.metricLabel, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>TIME</Text>
             <Text style={[styles.metricValue, { color: colors.foreground, fontFamily: "Inter_500Medium" }]}>
               {simulation.computeTimeMin >= 60
                 ? `${Math.floor(simulation.computeTimeMin / 60)}h ${simulation.computeTimeMin % 60}m`

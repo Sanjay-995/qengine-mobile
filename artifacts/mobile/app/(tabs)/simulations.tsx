@@ -125,7 +125,7 @@ export default function SimulationsScreen() {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
-        scrollEnabled={!!filtered.length}
+        scrollEnabled
         contentContainerStyle={[styles.list, { paddingBottom: botPad }]}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={

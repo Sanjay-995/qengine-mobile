@@ -161,11 +161,9 @@ export default function LoginScreen() {
                 <Text style={[styles.fieldLabel, { color: colors.mutedForeground, fontFamily: "Inter_500Medium" }]}>
                   Password
                 </Text>
-                <Pressable>
-                  <Text style={[styles.forgotText, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
-                    Forgot password
-                  </Text>
-                </Pressable>
+                <Text style={[styles.forgotText, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
+                  Forgot password
+                </Text>
               </View>
               <View style={styles.passwordWrap}>
                 <TextInput
@@ -241,7 +239,7 @@ export default function LoginScreen() {
               </Text>
             </View>
             <Text style={[styles.footerText, { color: colors.mutedForeground, fontFamily: "Inter_400Regular" }]}>
-              Redirects to /simulator
+              Redirects to workspace
             </Text>
           </View>
         </View>
