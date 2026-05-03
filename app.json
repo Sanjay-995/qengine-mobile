@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "QEngine Mobile",
+    "slug": "qengine-mobile",
+    "version": "2.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "qengine",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#030810"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "ai.qengine.mobile",
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "ai.qengine.mobile",
+      "versionCode": 1,
+      "compileSdkVersion": 35,
+      "targetSdkVersion": 35,
+      "minSdkVersion": 24,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#030810"
+      },
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.VIBRATE"
+      ],
+      "softwareKeyboardLayoutMode": "resize",
+      "allowBackup": false,
+      "edgeToEdgeLayoutEnabled": true
+    },
+    "web": {
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "origin": "https://replit.com/"
+        }
+      ],
+      "expo-font",
+      "expo-web-browser"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "qengine-mobile"
+      }
+    }
+  }
+}
